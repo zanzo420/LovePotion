@@ -47,7 +47,7 @@ void Font::Print(const char * text, double x, double y, SDL_Color color)
     SDL_SetSurfaceAlphaMod(this->surface, color.a);
 
     SDL_Rect position = {x, y, this->surface->w, this->surface->h};
-    SDL_BlitSurface(this->surface, NULL, Window::GetSurface(), &position);
+    // /SDL_BlitSurface(this->surface, NULL, Window::GetSurface(), &position);
 
     SDL_FreeSurface(this->surface);
 }

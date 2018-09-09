@@ -4,9 +4,9 @@ namespace Window
 {
     void Initialize();
 
-    SDL_Renderer * GetRenderer();
+    EGLDisplay GetDisplay();
 
-    SDL_Surface * GetSurface();
+    EGLSurface GetSurface();
 
     int SetMode(lua_State * L);
 

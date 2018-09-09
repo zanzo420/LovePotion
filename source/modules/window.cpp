@@ -1,47 +1,70 @@
 #include "common/runtime.h"
 #include "modules/window.h"
 
-SDL_Window * WINDOW;
-SDL_Renderer * RENDERER;
-SDL_Surface * WINDOW_SURFACE;
+static EGLDisplay DISPLAY;
+static EGLContext CONTEXT;
+static EGLSurface SURFACE;
 
-// create a 800x600 window for demonstration.
-// if SDL_WINDOW_FULLSCREEN flag is passed, it will be hardware scaled (stretched) to fit screen,
-// will always be centered and aspect ratio maintained.
-// maximum window dimension is currently limited to 1280x720
 void Window::Initialize()
 {
-    WINDOW = SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_FULLSCREEN);
+    // Connect to default display
+    DISPLAY = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
-    if (!WINDOW)
-        SDL_Quit();
+    if (!DISPLAY)
+        Love::RaiseError("Could not connect to display! error: %d", eglGetError());
 
-    RENDERER = SDL_CreateRenderer(WINDOW, 0, SDL_RENDERER_SOFTWARE);
+    eglInitialize(DISPLAY, nullptr, nullptr);
 
-    if (!RENDERER)
-        SDL_Quit();
+    if (eglBindAPI(EGL_OPENGL_API) == EGL_FALSE)
+        Love::RaiseError("Could not set API! error: %d", eglGetError());
 
-    WINDOW_SURFACE = SDL_GetWindowSurface(WINDOW);
+    EGLConfig config;
+    EGLint numConfigs;
+    static const EGLint attributeList[] =
+    {
+        EGL_RED_SIZE, 1,
+        EGL_GREEN_SIZE, 1,
+        EGL_BLUE_SIZE, 1,
+        EGL_NONE
+    };
 
-    SDL_SetRenderDrawBlendMode(RENDERER, SDL_BLENDMODE_BLEND);
+    eglChooseConfig(DISPLAY, attributeList, &config, 1, &numConfigs);
 
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+    if (numConfigs == 0)
+        Love::RaiseError("No config found! error: %d", eglGetError());
+
+    // Create surface
+    SURFACE = eglCreateWindowSurface(DISPLAY, config, (char*)"", nullptr);
+    if (!SURFACE)
+        Love::RaiseError("Surface creation failed! error: %d", eglGetError());
+
+    CONTEXT = eglCreateContext(DISPLAY, config, EGL_NO_CONTEXT, nullptr);
+    if (!CONTEXT)
+        Love::RaiseError("Context creation failed! error: %d", eglGetError());
+    
+    eglMakeCurrent(DISPLAY, SURFACE, SURFACE, CONTEXT);
 }
 
-SDL_Renderer * Window::GetRenderer()
+EGLDisplay Window::GetDisplay()
 {
-    return RENDERER;
+    return DISPLAY;
 }
 
-SDL_Surface * Window::GetSurface()
+EGLSurface Window::GetSurface()
 {
-    return WINDOW_SURFACE;
+    return SURFACE;
 }
 
 void Window::Exit()
 {
-    SDL_DestroyRenderer(RENDERER);
-    SDL_DestroyWindow(WINDOW);
+    eglDestroyContext(DISPLAY, CONTEXT);
+    CONTEXT = nullptr;
+
+    eglDestroySurface(DISPLAY, SURFACE);
+    SURFACE = nullptr;
+
+    eglTerminate(DISPLAY);
+    DISPLAY = nullptr;
 }
 
 //Löve2D Functions

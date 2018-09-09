@@ -57,8 +57,7 @@ void transformDrawable(float * originalX, float * originalY) // rotate, scale, a
 
 void Graphics::Initialize()
 {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-        printf("Failed to load SDL2");
+    gladLoadGL();
 
     TTF_Init();
 
@@ -107,9 +106,9 @@ int Graphics::SetBackgroundColor(lua_State * L)
         b = clamp(0, luaL_optnumber(L, -2, 0), 1);
     }
 
-    backgroundColor.r = r * 255;
-    backgroundColor.g = g * 255;
-    backgroundColor.b = b * 255;
+    backgroundColor.r = r;
+    backgroundColor.g = g;
+    backgroundColor.b = b;
 
     return 0;
 }
@@ -137,12 +136,12 @@ int Graphics::SetColor(lua_State * L)
         a = clamp(0, luaL_optnumber(L, -1, 1), 1);
     }
 
-    drawColor.r = r * 255;
-    drawColor.g = g * 255;
-    drawColor.b = b * 255;
-    drawColor.a = a * 255;
+    drawColor.r = r;
+    drawColor.g = g;
+    drawColor.b = b;
+    drawColor.a = a;
 
-    SDL_SetRenderDrawColor(Window::GetRenderer(), drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+    //SDL_SetRenderDrawColor(Window::GetRenderer(), drawColor.r, drawColor.g, drawColor.b, drawColor.a);
 
     return 0;
 }
@@ -150,9 +149,9 @@ int Graphics::SetColor(lua_State * L)
 //love.graphics.getBackgroundColor
 int Graphics::GetBackgroundColor(lua_State * L)
 {
-    lua_pushnumber(L, backgroundColor.r / 255);
-    lua_pushnumber(L, backgroundColor.g / 255);
-    lua_pushnumber(L, backgroundColor.b / 255);
+    lua_pushnumber(L, backgroundColor.r);
+    lua_pushnumber(L, backgroundColor.g);
+    lua_pushnumber(L, backgroundColor.b);
 
     return 3;
 }
@@ -160,10 +159,8 @@ int Graphics::GetBackgroundColor(lua_State * L)
 //love.graphics.clear
 int Graphics::Clear(lua_State * L)
 {
-    SDL_SetRenderDrawColor(Window::GetRenderer(), backgroundColor.r, backgroundColor.g, backgroundColor.b, 255);
-    SDL_RenderClear(Window::GetRenderer());
-
-    SDL_SetRenderDrawColor(Window::GetRenderer(), drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+    glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     return 0;
 }
@@ -171,7 +168,7 @@ int Graphics::Clear(lua_State * L)
 //love.graphics.present
 int Graphics::Present(lua_State * L)
 {
-    SDL_RenderPresent(Window::GetRenderer());
+    eglSwapBuffers(Window::GetDisplay(), Window::GetSurface());
 
     return 0;
 }
@@ -284,7 +281,7 @@ int Graphics::Print(lua_State * L)
 //love.graphics.setCanvas
 int Graphics::SetCanvas(lua_State * L)
 {
-    Canvas * self = NULL;
+    /*Canvas * self = NULL;
     if (!lua_isnoneornil(L, 1))
         self = (Canvas *)luaobj_checkudata(L, 1, LUAOBJ_TYPE_CANVAS);
 
@@ -295,7 +292,7 @@ int Graphics::SetCanvas(lua_State * L)
     }
     else
         SDL_SetRenderTarget(Window::GetRenderer(), NULL);
-
+    */
     return 0;
 }
 
@@ -314,11 +311,11 @@ int Graphics::Rectangle(lua_State * L)
 
     transformDrawable(&x, &y);
 
-    if (mode == "fill")
+    /*if (mode == "fill")
         boxRGBA(Window::GetRenderer(), x, y, x + width, y + height, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
     else if (mode == "line")
         rectangleRGBA(Window::GetRenderer(), x, y, x + width, y + height, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
-
+    */
     return 0;
 }
 
@@ -340,10 +337,11 @@ int Graphics::Polygon(lua_State * L)
 
     transformDrawable(&x, &y);
 
-    if (mode == "fill")
+    /*if (mode == "fill")
         filledTrigonRGBA(Window::GetRenderer(), x, y, bx, by, cx, cy, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
     else if (mode == "line")
         trigonRGBA(Window::GetRenderer(), x, y, bx, by, cx, cy, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+    */
 
     return 0;
 }
@@ -366,10 +364,11 @@ int Graphics::Arc(lua_State * L)
     start *= 180 / M_PI;
     end *= 180 / M_PI;
 
-    if (mode == "line")
+    /*if (mode == "line")
         pieRGBA(Window::GetRenderer(), x, y, radius, start, end, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
     else if (mode == "fill")
         filledPieRGBA(Window::GetRenderer(), x, y, radius, start, end, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+    */
 
     return 0;
 }
@@ -386,10 +385,11 @@ int Graphics::Circle(lua_State * L)
 
     float radius = luaL_checknumber(L, 4);
 
-    if (mode == "fill")
+    /*if (mode == "fill")
         filledCircleRGBA(Window::GetRenderer(), x, y, radius, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
     else if (mode == "line")
         circleRGBA(Window::GetRenderer(), x, y, radius, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+    */
 
     return 0;
 }
@@ -441,7 +441,7 @@ int Graphics::Line(lua_State * L)
 
                 lua_pop(L, 4);
 
-                thickLineRGBA(Window::GetRenderer(), startx, starty, endx, endy, lineWidth, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+                //thickLineRGBA(Window::GetRenderer(), startx, starty, endx, endy, lineWidth, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
             }
         }
     }
@@ -458,7 +458,7 @@ int Graphics::Line(lua_State * L)
             endx = luaL_checknumber(L, i + 3);
             endy = luaL_checknumber(L, i + 4);
 
-            thickLineRGBA(Window::GetRenderer(), startx, starty, endx, endy, lineWidth, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+            //thickLineRGBA(Window::GetRenderer(), startx, starty, endx, endy, lineWidth, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
         }
     }
 
@@ -525,7 +525,7 @@ int Graphics::Points(lua_State * L)
         points[i].y = coordinates[i * 2 + 1];
     }
 
-    SDL_RenderDrawPoints(Window::GetRenderer(), points, args);
+    //SDL_RenderDrawPoints(Window::GetRenderer(), points, args);
 
     delete[] coordinates;
 
@@ -536,7 +536,7 @@ int Graphics::Points(lua_State * L)
 int Graphics::SetScissor(lua_State * L)
 {
     if (lua_isnoneornil(L, 1))
-        SDL_RenderSetClipRect(Window::GetRenderer(), NULL);
+        return 0;//SDL_RenderSetClipRect(Window::GetRenderer(), NULL);
     else
     {
         int x = luaL_checknumber(L, 1);
@@ -550,7 +550,7 @@ int Graphics::SetScissor(lua_State * L)
 
         SDL_Rect scissor = {x, y, width, height};
 
-        SDL_RenderSetClipRect(Window::GetRenderer(), &scissor);
+        //SDL_RenderSetClipRect(Window::GetRenderer(), &scissor);
     }
 
     return 0;
@@ -648,7 +648,6 @@ bool Graphics::IsInitialized()
 void Graphics::Exit()
 {
     TTF_Quit();
-    SDL_Quit(); //kill remaining stuff
 }
 
 int Graphics::Register(lua_State * L)

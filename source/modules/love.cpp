@@ -35,21 +35,25 @@
 struct { const char * name; void (*open)(void); int (*fn)(lua_State *L); void (*close)(void); } modules[] = 
 {
     { "audio",      Audio::Initialize,      Audio::Register,      Audio::Exit      },
-    { "event",      NULL,                   Event::Register,      NULL             },
+    { "event",      NULL,                   LoveEvent::Register,  NULL             },
     { "filesystem", Filesystem::Initialize, Filesystem::Register, Filesystem::Exit },
-    { "graphics",   Graphics::Initialize,   Graphics::Register,   NULL             },
+    { "graphics",   NULL,                   Graphics::Register,   NULL             },
     { "joystick",   NULL,                   Joystick::Register,   NULL             },
     { "math",       NULL,                   Math::Register,       NULL             },
     { "system",     System::Initialize,     System::Register,     System::Exit     },
     { "thread",     NULL,                   LoveThread::Register, LoveThread::Exit },
     { "timer",      NULL,                   Timer::Register,      NULL             },
     { "touch",      NULL,                   Touch::Register,      NULL             },
-    { "window",     Window::Initialize,     Window::Register,     NULL             },
+    { "window",     NULL,                   Window::Register,     NULL             },
     { 0 }
 };
 
 void Love::InitModules(lua_State * L)
 {
+    Window::Initialize();
+
+    Graphics::Initialize();
+
     for (int i = 0; modules[i].name; i++)
     {
         if (modules[i].open)
@@ -84,11 +88,11 @@ int Love::Initialize(lua_State * L)
 
     luaL_Reg reg[] =
     {
-        { "_nogame",       NoGame           },
-        { "enableConsole", EnableConsole    },
-        { "getVersion",    GetVersion       },
-        { "run",           Run              },
-        { "scan",          Event::PollEvent },
+        { "_nogame",       NoGame               },
+        { "enableConsole", EnableConsole        },
+        { "getVersion",    GetVersion           },
+        { "run",           Run                  },
+        { "scan",          LoveEvent::PollEvent },
         { 0, 0 }
     };
 
@@ -139,7 +143,7 @@ int Love::RaiseError(const char * format, ...)
 //love.run
 int Love::Run(lua_State * L)
 {
-    Event::PollEvent(L);
+    LoveEvent::PollEvent(L);
 
     luaL_dostring(L, LOVE_TIMER_STEP);
 
