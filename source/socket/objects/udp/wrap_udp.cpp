@@ -30,7 +30,7 @@ int udpSend(lua_State * L)
 
     int sent = self->Send(datagram, length);
 
-    if (sent < 0)
+    if (sent <= 0)
         lua_pushnil(L);
     else
         lua_pushinteger(L, sent);
@@ -52,7 +52,7 @@ int udpSendTo(lua_State * L)
 
     int sent = self->SendTo(datagram, length, ip, port);
 
-    if (sent < 0)
+    if (sent <= 0)
         lua_pushnil(L);
     else
         lua_pushinteger(L, sent);
@@ -100,7 +100,7 @@ int udpReceiveFrom(lua_State * L)
 
     int length = self->ReceiveFrom(datagram, bytes);
 
-    if (length == 0)
+    if (length <= 0)
     {
         lua_pushnil(L);
         return 1;
@@ -122,7 +122,7 @@ int udpReceive(lua_State * L)
     char buffer[bytes];
     int length = self->Receive(buffer, NULL, bytes);
 
-    if (length == 0)
+    if (length <= 0)
         lua_pushnil(L);
     else
         lua_pushstring(L, buffer);

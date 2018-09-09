@@ -24,6 +24,9 @@ extern "C"
 #include <SDL2_gfxPrimitives.h>
 #include <SDL2_rotozoom.h>
 
+#include <EGL/egl.h>    // EGL library
+#include <glad/glad.h>  // glad library (OpenGL loader)
+
 //C++ headers
 #include <exception>
 #include <map>

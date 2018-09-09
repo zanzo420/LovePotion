@@ -37,13 +37,6 @@ typedef enum
 
 typedef struct
 {
-    char buffer[SOCKET_BUFFERSIZE];
-    char ip[0x40];
-    int port;
-} Datagram;
-
-typedef struct
-{
     int x;
     int y;
     int subWidth;
@@ -52,14 +45,6 @@ typedef struct
     int width;
     int height;
 } Viewport;
-
-typedef struct
-{
-    char * buffer;
-    size_t size;
-    int code;
-    char * header;
-} HTTPChunk;
 
 extern std::vector<const char *> FILE_MODES;
 
