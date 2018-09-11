@@ -10,7 +10,7 @@ Drawable::Drawable(char * type) : Object(type)
     this->horScale = 0.0;
 }
 
-void Drawable::Draw(const Viewport & view, double x, double y, double rotation, double scalarX, double scalarY, SDL_Color color)
+void Drawable::Draw(const Viewport & view, double x, double y, double rotation, double scalarX, double scalarY, Color color)
 {
     SDL_Rect quad = {view.x, view.y, view.subWidth * scalarX, view.subHeight * scalarY};
     SDL_Rect position = {x, y, view.subWidth * scalarX, view.subHeight * scalarY};

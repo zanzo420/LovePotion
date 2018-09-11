@@ -3,7 +3,7 @@ class Drawable : public Object
     public:
         Drawable(char * type);
         Drawable() {};
-        void Draw(const Viewport & viewport, double x, double y, double rotation, double scalarX, double scalarY, SDL_Color color);
+        void Draw(const Viewport & viewport, double x, double y, double rotation, double scalarX, double scalarY, Color color);
         ~Drawable();
 
         int GetWidth();

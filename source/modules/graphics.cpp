@@ -19,15 +19,28 @@
 #include "objects/text/text.h"
 #include "objects/text/wrap_text.h"
 
-bool isInitialized = false;
-SDL_Color backgroundColor = { 0, 0, 0, 255 };
-SDL_Color drawColor = { 255, 255, 255, 255 };
+#include "s_vtx_glsl.h"
+#include "s_frag_glsl.h"
+
+#define MAX_VERTICIES 4096
+
+Color backgroundColor = { 0, 0, 0, 255 };
+Color drawColor = { 255, 255, 255, 255 };
 
 float lineWidth = 2.0f;
 
 Font * currentFont = NULL;
 
+uint SHADER_PROGRAM;
+uint VERTEX_SHADER;
+uint FRAG_SHADER;
+uint VBO;
+uint VAO;
+
+int VERTEX_OFFSET = 0;
+
 vector<StackMatrix> stack;
+
 void transformDrawable(float * originalX, float * originalY) // rotate, scale, and translate coords.
 {
     if (stack.empty())
@@ -59,12 +72,41 @@ void Graphics::Initialize()
 {
     gladLoadGL();
 
+    // Load and compile shader
+    VERTEX_SHADER = glCreateShader(GL_VERTEX_SHADER);
+
+    glShaderSource(VERTEX_SHADER, 1, (const GLchar* const*)s_vtx_glsl, NULL);
+    glCompileShader(VERTEX_SHADER);
+
+    FRAG_SHADER = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(FRAG_SHADER, 1, (const GLchar* const*)s_frag_glsl, NULL);
+    glCompileShader(FRAG_SHADER);
+
+    // Create shader program
+    SHADER_PROGRAM = glCreateProgram();
+    
+    // Attach, link, and use
+    glAttachShader(SHADER_PROGRAM, VERTEX_SHADER);
+    glAttachShader(SHADER_PROGRAM, FRAG_SHADER);
+    glLinkProgram(SHADER_PROGRAM);
+
+    glUseProgram(SHADER_PROGRAM);
+
+    // Do some transformation magic ( ͡° ͜ʖ ͡°)
+    glm::mat4 transform = glm::ortho(0, 1280, 0, 720, -1, 1);
+    unsigned int transformLoc = glGetUniformLocation(SHADER_PROGRAM, "transMtx");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+    glBindVertexArray(VAO);
+    glGenBuffers(1, &VBO);
+
     TTF_Init();
 
     stack.reserve(16);
     stack.push_back(StackMatrix());
 
-    isInitialized = true;
+    // Allocate 4MB of buffer data
+    glBufferData(GL_ARRAY_BUFFER, MAX_VERTICIES * sizeof(Vertex), NULL, GL_STREAM_DRAW);
 }
 
 //Löve2D Functions
@@ -165,9 +207,12 @@ int Graphics::Clear(lua_State * L)
     return 0;
 }
 
-//love.graphics.present
+//love.graphics.presentpresent
 int Graphics::Present(lua_State * L)
 {
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, VERTEX_OFFSET);
+
     eglSwapBuffers(Window::GetDisplay(), Window::GetSurface());
 
     return 0;
@@ -296,6 +341,25 @@ int Graphics::SetCanvas(lua_State * L)
     return 0;
 }
 
+void Graphics::AppendVertex(float x, float y, Color color, VertexUV texCoord)
+{
+    Vertex vertex;
+
+    vertex.position.x = x;
+    vertex.position.y = y;
+    vertex.position.z = 0.5f;
+
+    vertex.color = color;
+
+    vertex.texCoord = texCoord;
+
+    int size = sizeof(vertex);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, VERTEX_OFFSET, size, &vertex);
+    VERTEX_OFFSET += size;
+}
+
 //love.graphics.rectangle
 int Graphics::Rectangle(lua_State * L)
 {
@@ -310,6 +374,10 @@ int Graphics::Rectangle(lua_State * L)
     float height = luaL_checknumber(L, 5);
 
     transformDrawable(&x, &y);
+
+    AppendVertex(x, y, drawColor, {-1, -1});
+    AppendVertex(x - 50, y + 50, drawColor, {-1, -1});
+    AppendVertex(x + 50, y + 50, drawColor, {-1, -1});
 
     /*if (mode == "fill")
         boxRGBA(Window::GetRenderer(), x, y, x + width, y + height, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
@@ -640,14 +708,11 @@ int Graphics::GetRendererInfo(lua_State * L)
 
 //End Löve2D Functions
 
-bool Graphics::IsInitialized()
-{
-    return isInitialized;
-}
-
 void Graphics::Exit()
 {
     TTF_Quit();
+    glDeleteShader(VERTEX_SHADER);
+    glDeleteShader(FRAG_SHADER);
 }
 
 int Graphics::Register(lua_State * L)

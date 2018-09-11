@@ -8,7 +8,6 @@
 namespace Graphics
 {
     void Initialize();
-    bool IsInitialized();
 
     //Löve2D Functions
 
@@ -56,6 +55,8 @@ namespace Graphics
     int Print(lua_State * L);
 
     //End Löve2D Functions
+
+    void AppendVertex(float x, float y, Color color, VertexUV uv);
 
     int Register(lua_State * L);
 

@@ -10,15 +10,6 @@ extern "C"
 
 #include <string>
 
-#include <EGL/egl.h>    // EGL library
-#include <glad/glad.h>  // glad library (OpenGL loader)
-
-#include "modules/audio.h"
-#include "modules/filesystem.h"
-#include "modules/graphics.h"
-#include "modules/window.h"
-#include "modules/system.h"
-
 #include "modules/timer.h"
 
 #include <stdio.h>

@@ -87,6 +87,10 @@ CFLAGS    :=    -g -Wall -O2 -ffunction-sections `sdl2-config --cflags` `freetyp
 
 CFLAGS    +=    $(INCLUDE) -D__SWITCH__
 
+# The following line works around an issue in newlib that produces a compilation
+# error in glm. It will be removed as soon as this issue is resolved.
+CFLAGS	+= -D_GLIBCXX_USE_C99_MATH_TR1 -D_LDBL_EQ_DBL
+
 CXXFLAGS    := $(CFLAGS) -fno-rtti -fexceptions -std=gnu++14
 
 ASFLAGS    :=    -g $(ARCH)
@@ -234,6 +238,12 @@ $(OUTPUT).elf    :    $(OFILES)
 
 #---------------------------------------------------------------------------------
 %.png.o    :    %.png
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
+
+#---------------------------------------------------------------------------------
+%.glsl.o    :   %.glsl
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)

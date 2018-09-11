@@ -26,6 +26,9 @@ extern "C"
 
 #include <EGL/egl.h>    // EGL library
 #include <glad/glad.h>  // glad library (OpenGL loader)
+#define GLM_FORCE_PURE
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 //C++ headers
 #include <exception>
