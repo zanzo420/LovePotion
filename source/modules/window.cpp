@@ -63,6 +63,12 @@ EGLSurface Window::GetSurface()
     return SURFACE;
 }
 
+void Window::Present()
+{
+    if (DISPLAY != nullptr && SURFACE != nullptr)
+        eglSwapBuffers(Window::GetDisplay(), Window::GetSurface());
+}
+
 void Window::Exit()
 {
     eglDestroyContext(DISPLAY, CONTEXT);

@@ -24,8 +24,8 @@
 
 #define MAX_VERTICIES 4096
 
-Color backgroundColor = { 0, 0, 0, 255 };
-Color drawColor = { 255, 255, 255, 255 };
+Color backgroundColor = { 0, 0, 0, 1 };
+Color drawColor = { 1, 1, 1, 1 };
 
 float lineWidth = 2.0f;
 
@@ -74,7 +74,6 @@ void Graphics::Initialize()
 
     // Load and compile shader
     VERTEX_SHADER = glCreateShader(GL_VERTEX_SHADER);
-
     glShaderSource(VERTEX_SHADER, 1, (const GLchar* const*)s_vtx_glsl, NULL);
     glCompileShader(VERTEX_SHADER);
 
@@ -90,6 +89,9 @@ void Graphics::Initialize()
     glAttachShader(SHADER_PROGRAM, FRAG_SHADER);
     glLinkProgram(SHADER_PROGRAM);
 
+    glDeleteShader(VERTEX_SHADER);
+    glDeleteShader(FRAG_SHADER);
+
     glUseProgram(SHADER_PROGRAM);
 
     // Do some transformation magic ( ͡° ͜ʖ ͡°)
@@ -97,10 +99,23 @@ void Graphics::Initialize()
     unsigned int transformLoc = glGetUniformLocation(SHADER_PROGRAM, "transMtx");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
-    glBindVertexArray(VAO);
+    glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
-    TTF_Init();
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+    glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //TTF_Init();
 
     stack.reserve(16);
     stack.push_back(StackMatrix());
@@ -210,11 +225,11 @@ int Graphics::Clear(lua_State * L)
 //love.graphics.presentpresent
 int Graphics::Present(lua_State * L)
 {
-    // glBindVertexArray(VAO);
-    // glDrawArrays(GL_TRIANGLES, 0, VERTEX_OFFSET);
-    // VERTEX_OFFSET = 0; // Reset our offset count
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, VERTEX_OFFSET);
+    VERTEX_OFFSET = 0; // Reset our offset count
 
-    eglSwapBuffers(Window::GetDisplay(), Window::GetSurface());
+    Window::Present();
 
     return 0;
 }
@@ -711,9 +726,7 @@ int Graphics::GetRendererInfo(lua_State * L)
 
 void Graphics::Exit()
 {
-    TTF_Quit();
-    glDeleteShader(VERTEX_SHADER);
-    glDeleteShader(FRAG_SHADER);
+    //TTF_Quit();
 }
 
 int Graphics::Register(lua_State * L)

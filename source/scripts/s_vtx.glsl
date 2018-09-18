@@ -17,5 +17,5 @@ void main()
     outColor = aColor;
 
     // Calculate texcoord
-    vtxTexCoord = inTexCoord
+    vtxTexCoord = inTexCoord;
 }

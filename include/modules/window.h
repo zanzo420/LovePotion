@@ -8,6 +8,8 @@ namespace Window
 
     EGLSurface GetSurface();
 
+    void Present();
+
     int SetMode(lua_State * L);
 
     int Register(lua_State * L);
