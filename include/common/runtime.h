@@ -25,6 +25,7 @@ extern "C"
 #include <SDL2_rotozoom.h>
 
 #include <EGL/egl.h>    // EGL library
+#include <EGL/eglext.h> // EGL extensions
 #include <glad/glad.h>  // glad library (OpenGL loader)
 #define GLM_FORCE_PURE
 #include <glm/gtc/matrix_transform.hpp>

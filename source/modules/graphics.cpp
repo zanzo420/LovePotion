@@ -210,9 +210,9 @@ int Graphics::Clear(lua_State * L)
 //love.graphics.presentpresent
 int Graphics::Present(lua_State * L)
 {
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, VERTEX_OFFSET);
-    VERTEX_OFFSET = 0; // Reset our offset count
+    // glBindVertexArray(VAO);
+    // glDrawArrays(GL_TRIANGLES, 0, VERTEX_OFFSET);
+    // VERTEX_OFFSET = 0; // Reset our offset count
 
     eglSwapBuffers(Window::GetDisplay(), Window::GetSurface());
 
