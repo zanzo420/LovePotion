@@ -93,7 +93,7 @@ void Graphics::Initialize()
     glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //TTF_Init();
+    glBindVertexArray(0);
 
     stack.reserve(16);
     stack.push_back(StackMatrix());
@@ -704,7 +704,9 @@ int Graphics::GetRendererInfo(lua_State * L)
 
 void Graphics::Exit()
 {
-    //TTF_Quit();
+    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO);
+    //delete currentShader;
 }
 
 int Graphics::Register(lua_State * L)

@@ -14,7 +14,7 @@ void main()
 {
     // Set up position and color
     gl_Position = transMtx * vec4(aPos, 1.0);
-    outColor = aColor;
+    ourColor = aColor;
 
     // Calculate texcoord
     vtxTexCoord = inTexCoord;
