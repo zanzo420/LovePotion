@@ -74,7 +74,7 @@ void Graphics::Initialize()
     glUseProgram(currentShader->GetProgram());
 
     // Do some transformation magic ( ͡° ͜ʖ ͡°)
-    glm::mat4 transform = glm::ortho(0, 1280, 0, 720, -1, 1);
+    glm::mat4 transform = glm::ortho(0.0f, 1280.0f, 720.0f, 0.0f, -1.0f, 1.0f);
     unsigned int transformLoc = glGetUniformLocation(currentShader->GetProgram(), "transMtx");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
