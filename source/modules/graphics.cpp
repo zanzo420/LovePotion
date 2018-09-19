@@ -209,7 +209,9 @@ int Graphics::Present(lua_State * L)
 {
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT);
+
     VERTEX_COUNT = 0; // Reset our offset count
+    VERTEX_BYTE_OFFSET = 0;
 
     Window::Present();
 
