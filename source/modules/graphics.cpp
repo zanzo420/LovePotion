@@ -37,6 +37,9 @@ uint VAO;
 int VERTEX_BYTE_OFFSET = 0;
 int VERTEX_COUNT = 0;
 
+GLint minFilter = GL_LINEAR;
+GLint magFilter = minFilter;
+
 vector<StackMatrix> stack;
 
 void transformDrawable(float * originalX, float * originalY) // rotate, scale, and translate coords.
@@ -268,6 +271,27 @@ int Graphics::Draw(lua_State * L)
 
 int Graphics::SetDefaultFilter(lua_State * L)
 {
+    string min = luaL_checkstring(L, 1);
+    string mag = luaL_checkstring(L, 2);
+    int anisotropy = luaL_optnumber(L, 3, 1);
+    
+    //TODO: Validate modes
+    //LOVE_VALIDATE_FILTER(min);
+    //LOVE_VALIDATE_FILTER(mag);
+
+    if (min == "linear")
+        minFilter = GL_LINEAR;
+    else if (min == "nearest")
+        minFilter = GL_NEAREST;
+    
+    if (mag == "linear")
+        magFilter = GL_LINEAR;
+    else if (mag == "nearest")
+        magFilter = GL_NEAREST;
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+
     return 0;
 }
 
