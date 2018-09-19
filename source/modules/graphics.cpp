@@ -34,7 +34,8 @@ Shader * currentShader = NULL;
 uint VBO;
 uint VAO;
 
-int VERTEX_OFFSET = 0;
+int VERTEX_BYTE_OFFSET = 0;
+int VERTEX_COUNT = 0;
 
 vector<StackMatrix> stack;
 
@@ -200,12 +201,12 @@ int Graphics::Clear(lua_State * L)
     return 0;
 }
 
-//love.graphics.presentpresent
+//love.graphics.present
 int Graphics::Present(lua_State * L)
 {
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, VERTEX_OFFSET);
-    VERTEX_OFFSET = 0; // Reset our offset count
+    glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT);
+    VERTEX_COUNT = 0; // Reset our offset count
 
     Window::Present();
 
@@ -350,8 +351,10 @@ void Graphics::AppendVertex(float x, float y, Color color, VertexUV texCoord)
     int size = sizeof(vertex);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, VERTEX_OFFSET, size, &vertex);
-    VERTEX_OFFSET += size;
+    glBufferSubData(GL_ARRAY_BUFFER, VERTEX_BYTE_OFFSET, size, &vertex);
+    VERTEX_BYTE_OFFSET += size;
+	
+    VERTEX_COUNT += 1;
 }
 
 //love.graphics.rectangle
