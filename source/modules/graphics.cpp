@@ -19,8 +19,7 @@
 #include "objects/text/text.h"
 #include "objects/text/wrap_text.h"
 
-#include "s_vtx_glsl.h"
-#include "s_frag_glsl.h"
+#include "objects/shader/shader.h"
 
 #define MAX_VERTICIES 4096
 
@@ -30,10 +29,8 @@ Color drawColor = { 1, 1, 1, 1 };
 float lineWidth = 2.0f;
 
 Font * currentFont = NULL;
+Shader * currentShader = NULL;
 
-uint SHADER_PROGRAM;
-uint VERTEX_SHADER;
-uint FRAG_SHADER;
 uint VBO;
 uint VAO;
 
@@ -72,31 +69,12 @@ void Graphics::Initialize()
 {
     gladLoadGL();
 
-    // Load and compile shader
-    VERTEX_SHADER = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(VERTEX_SHADER, 1, (const GLchar* const*)s_vtx_glsl, NULL);
-    glCompileShader(VERTEX_SHADER);
-
-    FRAG_SHADER = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(FRAG_SHADER, 1, (const GLchar* const*)s_frag_glsl, NULL);
-    glCompileShader(FRAG_SHADER);
-
-    // Create shader program
-    SHADER_PROGRAM = glCreateProgram();
-    
-    // Attach, link, and use
-    glAttachShader(SHADER_PROGRAM, VERTEX_SHADER);
-    glAttachShader(SHADER_PROGRAM, FRAG_SHADER);
-    glLinkProgram(SHADER_PROGRAM);
-
-    glDeleteShader(VERTEX_SHADER);
-    glDeleteShader(FRAG_SHADER);
-
-    glUseProgram(SHADER_PROGRAM);
+    currentShader = new Shader(); //sets itself up to default vertex and frag shaders
+    glUseProgram(currentShader->GetProgram());
 
     // Do some transformation magic ( ͡° ͜ʖ ͡°)
     glm::mat4 transform = glm::ortho(0, 1280, 0, 720, -1, 1);
-    unsigned int transformLoc = glGetUniformLocation(SHADER_PROGRAM, "transMtx");
+    unsigned int transformLoc = glGetUniformLocation(currentShader->GetProgram(), "transMtx");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
     glGenVertexArrays(1, &VAO);
