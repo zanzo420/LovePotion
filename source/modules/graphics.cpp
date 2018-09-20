@@ -88,6 +88,9 @@ void Graphics::Initialize()
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+    // Allocate 4MB of buffer data
+    glBufferData(GL_ARRAY_BUFFER, MAX_VERTICIES * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
+    
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
 
@@ -102,9 +105,6 @@ void Graphics::Initialize()
 
     stack.reserve(16);
     stack.push_back(StackMatrix());
-
-    // Allocate 4MB of buffer data
-    glBufferData(GL_ARRAY_BUFFER, MAX_VERTICIES * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
 }
 
 //Löve2D Functions
