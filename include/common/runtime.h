@@ -59,6 +59,10 @@ extern "C"
 #include "socket/luasocket.h"
 #include "socket/common.h"
 
+extern FILE * logFile;
+
+#define LOG(fmt, ...) \
+    fprintf(logFile, "%s: " fmt "\n", __PRETTY_FUNCTION__, ## __VA_ARGS__)
 
 using std::string;
 using std::vector;
@@ -66,18 +70,3 @@ using std::pair;
 using std::make_pair;
 using std::map;
 using std::queue;
-
-extern FILE * logFile;
-
-static inline void writeLog(const string & data)
-{
-    fwrite((char *)data.data(), 1, data.length(), logFile);
-
-    fflush(logFile);
-}
-
-static inline void closeLog()
-{
-    if (logFile != NULL)
-        fclose(logFile);
-}

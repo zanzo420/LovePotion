@@ -1,21 +1,20 @@
 #version 330 core
-precision mediump float;
 
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
+layout (location = 0) in vec3 inPos;
+layout (location = 1) in vec4 inColor;
 layout (location = 2) in vec2 inTexCoord;
 
-out vec3 ourColor;
-out vec2 vtxTexCoord;
+out vec4 vtxColor;
+//out vec2 vtxTexCoord;
 
 uniform mat4 transMtx;
 
 void main()
 {
     // Set up position and color
-    gl_Position = transMtx * vec4(aPos, 1.0);
-    ourColor = aColor;
+    gl_Position = transMtx * vec4(inPos, 1.0);
+    vtxColor = inColor;
 
     // Calculate texcoord
-    vtxTexCoord = inTexCoord;
+    //vtxTexCoord = inTexCoord;
 }

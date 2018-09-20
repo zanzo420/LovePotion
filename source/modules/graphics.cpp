@@ -73,12 +73,13 @@ void Graphics::Initialize()
 {
     gladLoadGL();
 
+    glDisable(GL_CULL_FACE);
+
     currentShader = new Shader(); //sets itself up to default vertex and frag shaders
-    glUseProgram(currentShader->GetProgram());
 
     // Do some transformation magic ( ͡° ͜ʖ ͡°)
     glm::mat4 transform = glm::ortho(0.0f, 1280.0f, 720.0f, 0.0f, -1.0f, 1.0f);
-    unsigned int transformLoc = glGetUniformLocation(currentShader->GetProgram(), "transMtx");
+    GLint transformLoc = glGetUniformLocation(currentShader->GetProgram(), "transMtx");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
     glGenVertexArrays(1, &VAO);
@@ -87,13 +88,13 @@ void Graphics::Initialize()
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, color));
     glEnableVertexAttribArray(1);
 
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, texCoord));
     glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -103,7 +104,7 @@ void Graphics::Initialize()
     stack.push_back(StackMatrix());
 
     // Allocate 4MB of buffer data
-    glBufferData(GL_ARRAY_BUFFER, MAX_VERTICIES * sizeof(Vertex), NULL, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, MAX_VERTICIES * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
 }
 
 //Löve2D Functions
@@ -199,7 +200,7 @@ int Graphics::GetBackgroundColor(lua_State * L)
 int Graphics::Clear(lua_State * L)
 {
     glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     return 0;
 }
@@ -207,12 +208,17 @@ int Graphics::Clear(lua_State * L)
 //love.graphics.present
 int Graphics::Present(lua_State * L)
 {
+    LOG("glUseProgram\n");
+    glUseProgram(currentShader->GetProgram());
+    LOG("glBindVertexArray\n");
     glBindVertexArray(VAO);
+    LOG("glDrawArrays - Triangles (0 -> %u)\n", VERTEX_COUNT);
     glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT);
 
     VERTEX_COUNT = 0; // Reset our offset count
     VERTEX_BYTE_OFFSET = 0;
 
+    LOG("Swapping Buffers\n");
     Window::Present();
 
     return 0;
@@ -366,21 +372,26 @@ void Graphics::AppendVertex(float x, float y, Color color, VertexUV texCoord)
 {
     Vertex vertex;
 
-    vertex.position.x = x;
-    vertex.position.y = y;
-    vertex.position.z = 0.5f;
+    vertex.position[0] = x;
+    vertex.position[1] = y;
+    vertex.position[2] = 0.0f;
 
-    vertex.color = color;
+    vertex.color[0] = color.r;
+    vertex.color[1] = color.g;
+    vertex.color[2] = color.b;
+    vertex.color[3] = color.a;
 
-    vertex.texCoord = texCoord;
+    vertex.texCoord[0] = texCoord.u;
+    vertex.texCoord[1] = texCoord.v;
 
     int size = sizeof(vertex);
-
+    LOG("Adding Vertex: %.1f,%.1f - {%.1f, %.1f, %.1f, %.1f}\n", x, y, color.r, color.g, color.b, color.a);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, VERTEX_BYTE_OFFSET, size, &vertex);
+
     VERTEX_BYTE_OFFSET += size;
-	
     VERTEX_COUNT += 1;
+    LOG("Vertex (Offset: %u - Count: %u)\n", VERTEX_BYTE_OFFSET, VERTEX_COUNT);
 }
 
 //love.graphics.rectangle
