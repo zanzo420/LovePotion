@@ -5,6 +5,13 @@
 
 #pragma once
 
+typedef struct
+{
+    int start;
+    int end;
+    int byteOffset;
+} VertexData;
+
 namespace Graphics
 {
     void Initialize();
@@ -56,6 +63,9 @@ namespace Graphics
 
     //End Löve2D Functions
     uint GetShader();
+
+    void Flush();
+    void ResetVertexData();
 
     void AppendVertex(float x, float y, Color color, VertexUV uv);
 

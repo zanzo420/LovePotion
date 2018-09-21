@@ -1,7 +1,7 @@
 #version 330 core
 
 in vec4 vtxColor;
-int vec2 vtxTexCoord;
+in vec2 vtxTexCoord;
 
 out vec4 outColor;
 uniform sampler2D image;

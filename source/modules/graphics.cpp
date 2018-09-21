@@ -40,6 +40,8 @@ int VERTEX_COUNT = 0;
 GLint minFilter = GL_LINEAR;
 GLint magFilter = minFilter;
 
+VertexData vtxData;
+
 vector<StackMatrix> stack;
 
 void transformDrawable(float * originalX, float * originalY) // rotate, scale, and translate coords.
@@ -103,6 +105,8 @@ void Graphics::Initialize()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    Graphics::Flush();
 
     stack.reserve(16);
     stack.push_back(StackMatrix());
@@ -209,13 +213,11 @@ int Graphics::Clear(lua_State * L)
 //love.graphics.present
 int Graphics::Present(lua_State * L)
 {
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT);
-
-    VERTEX_COUNT = 0; // Reset our offset count
-    VERTEX_BYTE_OFFSET = 0;
+    Graphics::Flush();
 
     Window::Present();
+
+    Graphics::ResetVertexData();
 
     return 0;
 }
@@ -269,6 +271,8 @@ int Graphics::Draw(lua_State * L)
         drawable->Draw(quad->GetViewport(), x, y, rotation, scalarX, scalarY, drawColor);
     else
         drawable->Draw(drawable->GetViewport(), x, y, rotation, scalarX, scalarY, drawColor);
+
+    vtxData.start += 6;
 
     return 0;
 }
@@ -380,12 +384,11 @@ void Graphics::AppendVertex(float x, float y, Color color, VertexUV texCoord)
     vertex.texCoord[0] = texCoord.u;
     vertex.texCoord[1] = texCoord.v;
 
-    int size = sizeof(Vertex);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, VERTEX_BYTE_OFFSET, size, &vertex);
+    glBufferSubData(GL_ARRAY_BUFFER, vtxData.byteOffset, sizeof(vertex), &vertex);
 
-    VERTEX_BYTE_OFFSET += size;
-    VERTEX_COUNT += 1;
+    vtxData.byteOffset += sizeof(vertex);
+    vtxData.end += 1;
 }
 
 //love.graphics.rectangle
@@ -742,6 +745,19 @@ int Graphics::GetRendererInfo(lua_State * L)
 uint Graphics::GetShader()
 {
     return currentShader->GetProgram();
+}
+
+void Graphics::Flush()
+{
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, vtxData.start, vtxData.end);
+}
+
+void Graphics::ResetVertexData()
+{
+    vtxData.start = 0;
+    vtxData.end = 0;
+    vtxData.byteOffset = 0;
 }
 
 void Graphics::Exit()

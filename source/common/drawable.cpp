@@ -75,10 +75,6 @@ u32 * Drawable::LoadPNG(const char * path, char * buffer, size_t memorySize)
         color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
         png_set_gray_to_rgb(png);
 
-    //output ABGR
-    png_set_bgr(png);
-    png_set_swap_alpha(png);
-
     png_read_update_info(png, info);
 
     png_bytep * row_pointers = new (std::nothrow) png_bytep[this->height];
@@ -138,6 +134,8 @@ void Drawable::Draw(const Viewport & view, double x, double y, double rotation, 
     Graphics::AppendVertex(x + width, y + height, color, {1, 0});
     Graphics::AppendVertex(x + width, y, color, {1, 1});
     Graphics::AppendVertex(x, y, color, {0, 1});
+
+    Graphics::Flush();
 
     glUniform1i(textureLoc, GL_FALSE);
 }
