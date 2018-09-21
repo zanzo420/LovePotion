@@ -55,6 +55,7 @@ namespace Graphics
     int Print(lua_State * L);
 
     //End Löve2D Functions
+    uint GetShader();
 
     void AppendVertex(float x, float y, Color color, VertexUV uv);
 

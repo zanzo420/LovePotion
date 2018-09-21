@@ -76,6 +76,7 @@ void Graphics::Initialize()
     glDisable(GL_CULL_FACE);
 
     currentShader = new Shader(); //sets itself up to default vertex and frag shaders
+    glUseProgram(currentShader->GetProgram());
 
     // Do some transformation magic ( ͡° ͜ʖ ͡°)
     glm::mat4 transform = glm::ortho(0.0f, 1280.0f, 720.0f, 0.0f, -1.0f, 1.0f);
@@ -208,17 +209,12 @@ int Graphics::Clear(lua_State * L)
 //love.graphics.present
 int Graphics::Present(lua_State * L)
 {
-    LOG("glUseProgram\n");
-    glUseProgram(currentShader->GetProgram());
-    LOG("glBindVertexArray\n");
     glBindVertexArray(VAO);
-    LOG("glDrawArrays - Triangles (0 -> %u)\n", VERTEX_COUNT);
     glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT);
 
     VERTEX_COUNT = 0; // Reset our offset count
     VERTEX_BYTE_OFFSET = 0;
 
-    LOG("Swapping Buffers\n");
     Window::Present();
 
     return 0;
@@ -384,14 +380,12 @@ void Graphics::AppendVertex(float x, float y, Color color, VertexUV texCoord)
     vertex.texCoord[0] = texCoord.u;
     vertex.texCoord[1] = texCoord.v;
 
-    int size = sizeof(vertex);
-    LOG("Adding Vertex: %.1f,%.1f - {%.1f, %.1f, %.1f, %.1f}\n", x, y, color.r, color.g, color.b, color.a);
+    int size = sizeof(Vertex);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, VERTEX_BYTE_OFFSET, size, &vertex);
 
     VERTEX_BYTE_OFFSET += size;
     VERTEX_COUNT += 1;
-    LOG("Vertex (Offset: %u - Count: %u)\n", VERTEX_BYTE_OFFSET, VERTEX_COUNT);
 }
 
 //love.graphics.rectangle
@@ -409,15 +403,19 @@ int Graphics::Rectangle(lua_State * L)
 
     transformDrawable(&x, &y);
 
-    AppendVertex(x, y, drawColor, {-1, -1});
-    AppendVertex(x - 50, y + 50, drawColor, {-1, -1});
-    AppendVertex(x + 50, y + 50, drawColor, {-1, -1});
+    if (mode == "fill")
+    {
+        AppendVertex(x, y, drawColor, {-1, -1});
+        AppendVertex(x, y + height, drawColor, {-1, -1});
+        AppendVertex(x + width, y + height, drawColor, {-1, -1});
 
-    /*if (mode == "fill")
-        boxRGBA(Window::GetRenderer(), x, y, x + width, y + height, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+        AppendVertex(x + width, y + height, drawColor, {-1, -1});
+        AppendVertex(x + width, y, drawColor, {-1, -1});
+        AppendVertex(x, y, drawColor, {-1, -1});
+    }
     else if (mode == "line")
-        rectangleRGBA(Window::GetRenderer(), x, y, x + width, y + height, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
-    */
+        return 0; //rectangleRGBA(Window::GetRenderer(), x, y, x + width, y + height, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+    
     return 0;
 }
 
@@ -741,6 +739,10 @@ int Graphics::GetRendererInfo(lua_State * L)
 }
 
 //End Löve2D Functions
+uint Graphics::GetShader()
+{
+    return currentShader->GetProgram();
+}
 
 void Graphics::Exit()
 {

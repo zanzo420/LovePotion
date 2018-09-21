@@ -5,7 +5,7 @@ layout (location = 1) in vec4 inColor;
 layout (location = 2) in vec2 inTexCoord;
 
 out vec4 vtxColor;
-//out vec2 vtxTexCoord;
+out vec2 vtxTexCoord;
 
 uniform mat4 transMtx;
 
@@ -16,5 +16,5 @@ void main()
     vtxColor = inColor;
 
     // Calculate texcoord
-    //vtxTexCoord = inTexCoord;
+    vtxTexCoord = inTexCoord;
 }

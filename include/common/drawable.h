@@ -11,17 +11,11 @@ class Drawable : public Object
 
         Viewport GetViewport();
 
-    private:
-        SDL_Surface * Flip(SDL_Rect & quad, SDL_Rect & position, double rotation, double x, double y);
-
     protected:
         int width;
         int height;
 
-        SDL_Texture * texture;
-        SDL_Surface * surface;
-
+        uint textureHandle;
         Viewport viewport;
-
-        double horScale;
+        u32 * LoadPNG(const char * path, char * buffer, size_t memorySize);
 };

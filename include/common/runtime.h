@@ -62,7 +62,7 @@ extern "C"
 extern FILE * logFile;
 
 #define LOG(fmt, ...) \
-    fprintf(logFile, "%s: " fmt "\n", __PRETTY_FUNCTION__, ## __VA_ARGS__)
+    fprintf(logFile, "%s:%d:\n" fmt "\n", __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__)
 
 using std::string;
 using std::vector;

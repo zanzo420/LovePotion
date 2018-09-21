@@ -8,5 +8,5 @@ class Image : public Drawable
         ~Image();
 
     private:
-        SDL_Surface * GetMemoryImage(const char * path);
+        uint GetMemoryImage(const char * path);
 };

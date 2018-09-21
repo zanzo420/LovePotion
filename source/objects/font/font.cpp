@@ -13,7 +13,7 @@ Font::Font(const char * path, int size) : Object("Font")
 
     this->font = TTF_OpenFont(path, this->size);
 
-    this->surface = NULL;
+    //this->surface = NULL;
 
     if (!this->font)
         printf("Font error: %s", TTF_GetError());
@@ -49,7 +49,7 @@ void Font::Print(const char * text, double x, double y, Color color)
     SDL_Rect position = {x, y, this->surface->w, this->surface->h};
     // /SDL_BlitSurface(this->surface, NULL, Window::GetSurface(), &position);
 
-    SDL_FreeSurface(this->surface);
+    //SDL_FreeSurface(this->surface);
 }
 
 Font::~Font()

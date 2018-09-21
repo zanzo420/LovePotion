@@ -19,31 +19,33 @@
 
 Image::Image(const char * path, bool memory) : Drawable("Image")
 {
-    SDL_Surface * tempSurface = NULL;
+    uint texture;
+    u32 * buffer = nullptr;
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     if (!memory)
-    {
-        tempSurface = IMG_Load(path);
-        if (!tempSurface)
-            printf("Failed to load %s", path);
-    }
+        buffer = this->LoadPNG(path, nullptr, -1);
     else
-        tempSurface = this->GetMemoryImage(path);
+        LOG("[ERR] MEMORY IMAGES NOT DONE");//tempSurface = this->GetMemoryImage(path);
 
-    //this->surface = SDL_ConvertSurface(tempSurface, Window::GetSurface()->format, NULL);
-    //SDL_SetSurfaceBlendMode(this->surface, SDL_BLENDMODE_BLEND);
+    if (buffer != nullptr)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        glGenerateMipmap(GL_TEXTURE_2D);
 
-    //this->texture = SDL_CreateTextureFromSurface(Window::GetRenderer(), tempSurface);
+        delete[] buffer;
+    }
+    this->textureHandle = texture;
 
-    this->width = tempSurface->w;
-    this->height = tempSurface->h;
-
-    this->viewport = {0, 0, this->width, this->height, this->width, this->height};
-
-    SDL_FreeSurface(tempSurface);
+    this->viewport = {0, 0, 1, 1, this->width, this->height};
 }
 
-SDL_Surface * Image::GetMemoryImage(const char * path)
+uint Image::GetMemoryImage(const char * path)
 {
     string name = path;
     name = name.substr(name.find(":") + 1);
@@ -69,5 +71,5 @@ SDL_Surface * Image::GetMemoryImage(const char * path)
     else
         returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)plus_png, plus_png_size), 1);
 
-    return returnSurface;
+    return 0;
 }
