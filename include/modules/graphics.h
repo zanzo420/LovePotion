@@ -12,6 +12,13 @@ typedef struct
     int byteOffset;
 } VertexData;
 
+typedef enum
+{
+    PRIMITIVE,
+    CIRCLE,
+    TEXTURE
+} DrawingMode;
+
 namespace Graphics
 {
     void Initialize();

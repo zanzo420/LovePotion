@@ -8,5 +8,5 @@ class Image : public Drawable
         ~Image();
 
     private:
-        uint GetMemoryImage(const char * path);
+        char * GetMemoryImage(const char * path);
 };

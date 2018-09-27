@@ -41,41 +41,18 @@ GLint minFilter = GL_LINEAR;
 GLint magFilter = minFilter;
 
 VertexData vtxData;
+DrawingMode drawMode;
 
 vector<StackMatrix> stack;
-
-void transformDrawable(float * originalX, float * originalY) // rotate, scale, and translate coords.
-{
-    if (stack.empty())
-        return;
-
-    StackMatrix & matrix = stack.back();
-
-    //float newLeft = *originalX;
-    //float newTop = *originalY;
-
-    //Translate
-    *originalX += matrix.ox;
-    *originalY += matrix.oy;
-
-    //Scale
-    /*originalX *= matrix.sx;
-    *originalY *= matrix.sy;
-
-    //Rotate
-    *originalX = newLeft * cos(matrix.r) - newTop * sin(matrix.r);
-    *originalY = newLeft * sin(matrix.r) + newTop * cos(matrix.r);
-
-    //Shear
-    *originalX = newLeft + matrix.kx * newTop;
-    *originalY = newTop + matrix.ky * newLeft;*/
-}
 
 void Graphics::Initialize()
 {
     gladLoadGL();
 
     glDisable(GL_CULL_FACE);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     currentShader = new Shader(); //sets itself up to default vertex and frag shaders
     glUseProgram(currentShader->GetProgram());
@@ -106,10 +83,12 @@ void Graphics::Initialize()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    Graphics::Flush();
+    Graphics::ResetVertexData();
 
     stack.reserve(16);
     stack.push_back(StackMatrix());
+
+    drawMode = DrawingMode::PRIMITIVE;
 }
 
 //Löve2D Functions
@@ -262,8 +241,6 @@ int Graphics::Draw(lua_State * L)
     float offsetX = luaL_optnumber(L, start + 5, 0);
     float offsetY = luaL_optnumber(L, start + 6, 0);
 
-    transformDrawable(&x, &y);
-
     x -= offsetX;
     y -= offsetY;
 
@@ -340,8 +317,6 @@ int Graphics::Print(lua_State * L)
     float x = luaL_optnumber(L, 2, 0);
     float y = luaL_optnumber(L, 3, 0);
 
-    transformDrawable(&x, &y);
-
     if (currentFont == NULL)
         return 0;
 
@@ -370,6 +345,17 @@ int Graphics::SetCanvas(lua_State * L)
 
 void Graphics::AppendVertex(float x, float y, Color color, VertexUV texCoord)
 {
+    DrawingMode oldMode = drawMode;
+    if (texCoord.u != -1 && texCoord.v != -1)
+        drawMode = DrawingMode::TEXTURE;
+    else if (texCoord.u == -2 && texCoord.v == -2)
+        drawMode = DrawingMode::CIRCLE;
+    else
+        drawMode = DrawingMode::PRIMITIVE;
+
+    if (drawMode != oldMode)
+        Graphics::Flush();
+
     Vertex vertex;
 
     vertex.position[0] = x;
@@ -404,20 +390,15 @@ int Graphics::Rectangle(lua_State * L)
     float width = luaL_checknumber(L, 4);
     float height = luaL_checknumber(L, 5);
 
-    transformDrawable(&x, &y);
+    AppendVertex(x, y, drawColor, {-1, -1});
+    AppendVertex(x, y + height, drawColor, {-1, -1});
+    AppendVertex(x + width, y + height, drawColor, {-1, -1});
 
-    if (mode == "fill")
-    {
-        AppendVertex(x, y, drawColor, {-1, -1});
-        AppendVertex(x, y + height, drawColor, {-1, -1});
-        AppendVertex(x + width, y + height, drawColor, {-1, -1});
+    AppendVertex(x + width, y + height, drawColor, {-1, -1});
+    AppendVertex(x + width, y, drawColor, {-1, -1});
+    AppendVertex(x, y, drawColor, {-1, -1});
 
-        AppendVertex(x + width, y + height, drawColor, {-1, -1});
-        AppendVertex(x + width, y, drawColor, {-1, -1});
-        AppendVertex(x, y, drawColor, {-1, -1});
-    }
-    else if (mode == "line")
-        return 0; //rectangleRGBA(Window::GetRenderer(), x, y, x + width, y + height, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
+    vtxData.start += 6;
     
     return 0;
 }
@@ -437,8 +418,6 @@ int Graphics::Polygon(lua_State * L)
 	
 	float cx = luaL_checknumber(L, 6);
     float cy = luaL_checknumber(L, 7);
-
-    transformDrawable(&x, &y);
 
     /*if (mode == "fill")
         filledTrigonRGBA(Window::GetRenderer(), x, y, bx, by, cx, cy, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
@@ -487,12 +466,22 @@ int Graphics::Circle(lua_State * L)
     float y = luaL_optnumber(L, 3, 0);
 
     float radius = luaL_checknumber(L, 4);
+    int segments = luaL_optnumber(L, 5, 100);
 
-    /*if (mode == "fill")
-        filledCircleRGBA(Window::GetRenderer(), x, y, radius, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
-    else if (mode == "line")
-        circleRGBA(Window::GetRenderer(), x, y, radius, drawColor.r, drawColor.g, drawColor.b, drawColor.a);
-    */
+    int numberOfVertices = segments + 2;
+    float doublePI = 2.0f * M_PI;
+
+    AppendVertex(x, y, drawColor, {-2, -2});
+
+    for (int i = 1; i < numberOfVertices; i++)
+    {
+        float cx = radius * cos(i * doublePI / segments);
+        float cy = radius * sin(i * doublePI / segments);
+
+        AppendVertex(cx, cy, drawColor, {-2, -2});
+    }
+
+    vtxData.start += numberOfVertices;
 
     return 0;
 }
@@ -639,9 +628,11 @@ int Graphics::Points(lua_State * L)
 int Graphics::SetScissor(lua_State * L)
 {
     if (lua_isnoneornil(L, 1))
-        return 0;//SDL_RenderSetClipRect(Window::GetRenderer(), NULL);
+        glDisable(GL_SCISSOR_TEST);
     else
     {
+        glEnable(GL_SCISSOR_TEST);
+
         int x = luaL_checknumber(L, 1);
         int y = luaL_checknumber(L, 2);
 
@@ -651,9 +642,7 @@ int Graphics::SetScissor(lua_State * L)
         if (width < 0 || height < 0)
             return luaL_error(L, "Scissor cannot have a negative width or height");
 
-        SDL_Rect scissor = {x, y, width, height};
-
-        //SDL_RenderSetClipRect(Window::GetRenderer(), &scissor);
+        glScissor(x, y, width, height);
     }
 
     return 0;
@@ -750,7 +739,11 @@ uint Graphics::GetShader()
 void Graphics::Flush()
 {
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, vtxData.start, vtxData.end);
+
+    if (drawMode != DrawingMode::CIRCLE)
+        glDrawArrays(GL_TRIANGLES, vtxData.start, vtxData.end);
+    else
+        glDrawArrays(GL_TRIANGLE_FAN, vtxData.start, vtxData.end);
 }
 
 void Graphics::ResetVertexData()

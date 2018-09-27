@@ -25,13 +25,13 @@ Image::Image(const char * path, bool memory) : Drawable("Image")
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
     if (!memory)
-        buffer = this->LoadPNG(path, nullptr, -1);
+        buffer = this->LoadPNG(path, nullptr, 0);
     else
-        LOG("[ERR] MEMORY IMAGES NOT DONE");//tempSurface = this->GetMemoryImage(path);
+        buffer = this->GetMemoryImage(path);
 
     if (buffer != nullptr)
     {
@@ -40,36 +40,37 @@ Image::Image(const char * path, bool memory) : Drawable("Image")
 
         delete[] buffer;
     }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     this->textureHandle = texture;
 
     this->viewport = {0, 0, 1, 1, this->width, this->height};
 }
 
-uint Image::GetMemoryImage(const char * path)
+char * Image::GetMemoryImage(const char * path)
 {
     string name = path;
     name = name.substr(name.find(":") + 1);
 
-    SDL_Surface * returnSurface = NULL;
-
     if (name == "dog")
-        returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)dog_png, dog_png_size), 1);
+        return this->LoadPNG(nullptr, dog_png, dog_png_size);
     else if (name == "head")
-        returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)head_png, head_png_size), 1);
+        return this->LoadPNG(nullptr, head_png, head_png_size);
     else if (name == "dogshadow")
-        returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)dogshadow_png, dogshadow_png_size), 1);
+        return this->LoadPNG(nullptr, dogshadow_png, dogshadow_png_size);
     else if (name == "shadow")
-        returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)shadow_png, shadow_png_size), 1);
+        return this->LoadPNG(nullptr, shadow_png, shadow_png_size);
     else if (name == "tail")
-        returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)tail_png, tail_png_size), 1);
+        return this->LoadPNG(nullptr, tail_png, tail_png_size);
     else if (name == "tongue")
-        returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)tongue_png, tongue_png_size), 1);
+        return this->LoadPNG(nullptr, tongue_png, tongue_png_size);
     else if (name == "cloud")
-        returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)cloud_png, cloud_png_size), 1);
+        return this->LoadPNG(nullptr, cloud_png, cloud_png_size);
     else if (name == "warn")
-        returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)warn_png, warn_png_size), 1);
+        return this->LoadPNG(nullptr, warn_png, warn_png_size);
     else
-        returnSurface = IMG_Load_RW(SDL_RWFromMem((void *)plus_png, plus_png_size), 1);
+        return this->LoadPNG(nullptr, plus_png, plus_png_size);
 
-    return 0;
+    return nullptr;
 }

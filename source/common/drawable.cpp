@@ -4,12 +4,24 @@
 
 Drawable::Drawable(char * type) : Object(type) { }
 
+Drawable::~Drawable()
+{
+    if (this->textureHandle != 0)
+    {
+        glDeleteTextures(1, &this->textureHandle);
+        this->textureHandle = 0;
+    }
+
+    this->width = 0;
+    this->height = 0;
+}
+
 u32 * Drawable::LoadPNG(const char * path, char * buffer, size_t memorySize)
 {
     u32 * out = nullptr;
     FILE * input;
 
-    if (memorySize == -1)
+    if (buffer == nullptr || memorySize == 0)
         input = fopen(path, "rb");
     else
         input = fmemopen(buffer, memorySize, "rb");
@@ -104,13 +116,13 @@ u32 * Drawable::LoadPNG(const char * path, char * buffer, size_t memorySize)
         return nullptr;
     }
 
-    for(int j = 0; j < this->height; j++)
+    for(int j = this->height - 1; j >= 0; j--)
     {
         png_bytep row = row_pointers[j];
         for(int i = 0; i < this->width; i++)
         {
             png_bytep px = &(row[i * 4]);
-            memcpy(&out[j * this->width + i], px, sizeof(u32));
+            memcpy(&out[(((this->height - 1) - j) * this->width) + i], px, sizeof(u32));
         }
         free(row_pointers[j]); // free the completed row, to avoid having to iterate over the whole thing again
     }
@@ -126,6 +138,22 @@ void Drawable::Draw(const Viewport & view, double x, double y, double rotation, 
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->textureHandle);
+    
+    /*
+    float left   = viewport.x; //0
+    float top    = viewport.y; //0
+
+    float right  = viewport.width; //1
+    float bottom = viewport.height; //1
+
+    Graphics::AppendVertex(x, y, color, {left, bottom});
+    Graphics::AppendVertex(x, y + height, color, {left, top});
+    Graphics::AppendVertex(x + width, y + height, color, {right, top});
+
+    Graphics::AppendVertex(x + width, y + height, color, {right, top});
+    Graphics::AppendVertex(x + width, y, color, {right, bottom});
+    Graphics::AppendVertex(x, y, color, {left, bottom});
+    */
 
     Graphics::AppendVertex(x, y, color, {0, 1});
     Graphics::AppendVertex(x, y + height, color, {0, 0});
@@ -138,6 +166,7 @@ void Drawable::Draw(const Viewport & view, double x, double y, double rotation, 
     Graphics::Flush();
 
     glUniform1i(textureLoc, GL_FALSE);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Viewport Drawable::GetViewport()
@@ -153,9 +182,4 @@ int Drawable::GetWidth()
 int Drawable::GetHeight()
 {
     return this->height;
-}
-
-Drawable::~Drawable()
-{
-    //SDL_DestroyTexture(this->texture);
 }
