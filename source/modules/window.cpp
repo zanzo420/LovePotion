@@ -71,6 +71,8 @@ void Window::Present()
 
 void Window::Exit()
 {
+    eglMakeCurrent(DISPLAY, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
     eglDestroyContext(DISPLAY, CONTEXT);
     CONTEXT = nullptr;
 
