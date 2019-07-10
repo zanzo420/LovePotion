@@ -6,13 +6,13 @@
 
 std::vector<string> KEYS =
 {
-    "a", "b", "select", "start",
+    "a", "b", "back", "start",
     "dpright", "dpleft", "dpup", "dpdown",
-    "r", "l", "x", "y",
-    "", "", "zl", "zr",
+    "rightshoulder", "leftshoulder", "x", "y",
+    "", "", "triggerleft", "triggerright",
     "", "", "", "",
-    "touch", "", "", "", "cstickright",
-    "cstickleft", "cstickup", "cstickdown",
+    "touch", "", "", "",
+    "cstickright", "cstickleft", "cstickup", "cstickdown",
     "cpadright", "cpadleft", "cpadup", "cpaddown"
 };
 
