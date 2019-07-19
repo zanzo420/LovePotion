@@ -46,7 +46,7 @@ int LoveEvent::Pump(lua_State * L)
                 {
                     love_push_userdata(L, controller);
 
-                    lua_pushnumber(L, event.jaxis.axis);
+                    lua_pushnumber(L, event.jaxis.axis + 1);
 
                     float value = (float)event.jaxis.value / JOYSTICK_MAX;
                     controller->ClampAxis(value);
@@ -58,14 +58,14 @@ int LoveEvent::Pump(lua_State * L)
             }
             case SDL_JOYHATMOTION:
             {
-                Gamepad * controller = Joystick::GetJoystickFromID(event.jaxis.which);
+                Gamepad * controller = Joystick::GetJoystickFromID(event.jhat.which);
 
                 love_getfield(L, "joystickhat");
 
                 if (!lua_isnil(L, -1))
                 {
                     love_push_userdata(L, controller);
-                    lua_pushnumber(L, event.jhat.hat)
+                    lua_pushnumber(L, event.jhat.hat + 1);
                     
                     string val;
 
@@ -110,7 +110,7 @@ int LoveEvent::Pump(lua_State * L)
             case SDL_JOYDEVICEADDED:
             {
                 // add joystick to list with jdevice.which
-                //Joystick::Add(event.jdevice.which);
+                Joystick::AddJoystick(L, event.jdevice.which);
                 // then grab that joystick out of the list and push it
                 Gamepad * controller = Joystick::GetJoystickFromID(event.jdevice.which);
 
@@ -137,14 +137,14 @@ int LoveEvent::Pump(lua_State * L)
                     lua_call(L, 1, 0);
                 }
 
-                Joystick::RemoveJoystick(event.jdevice.which);
+                Joystick::RemoveJoystick(L, event.jdevice.which);
 
                 break;
             }
             case SDL_CONTROLLERBUTTONDOWN:
             case SDL_CONTROLLERBUTTONUP:
             {
-                Gamepad * controller = Joystick::GetJoystickFromID(event.jbutton.which);
+                Gamepad * controller = Joystick::GetJoystickFromID(event.cbutton.which);
 
                 love_getfield(L, (event.type == SDL_CONTROLLERBUTTONDOWN) ? "gamepadpressed" : "gamepadreleased");
 
@@ -159,7 +159,7 @@ int LoveEvent::Pump(lua_State * L)
             }
             case SDL_CONTROLLERAXISMOTION:
             {
-                Gamepad * controller = Joystick::GetJoystickFromID(event.jbutton.which);
+                Gamepad * controller = Joystick::GetJoystickFromID(event.caxis.which);
 
                 love_getfield(L, "gamepadaxis");
 

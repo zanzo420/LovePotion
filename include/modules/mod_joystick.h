@@ -1,20 +1,17 @@
-/*
-** modules/joystick.h
-** @brief    : Handles (basic) joystick stuff.
-** @ref        : See wrap_gamepad.cpp for advanced use.
-*/
-
 #pragma once
 
 namespace Joystick
 {
-    // std::array<Gamepad *, 8> controllers;
 
     void Initialize(lua_State * L); //should set up joysticks
 
-    Gamepad * GetJoystickFromID(uint id);
-    
-    void RemoveJoystick(uint id);
+    #if defined(__SWITCH__)
+        Gamepad * GetJoystickFromID(uint id);
+        
+        void AddJoystick(lua_State * L, uint idx);
+
+        void RemoveJoystick(lua_State * L, uint idx);
+    #endif
 
     //Löve2D Functions
 
@@ -22,11 +19,7 @@ namespace Joystick
 
     int GetJoystickCount(lua_State * L);
 
-    int SetLayout(lua_State * L);
-
     //End Löve2D Functions
 
     int Register(lua_State * L);
 }
-
-extern std::vector<Gamepad *> controllers;

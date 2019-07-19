@@ -3,7 +3,7 @@
 class Gamepad : public Object
 {
     public:
-        Gamepad();
+        Gamepad(uint idx);
         ~Gamepad();
 
         float GetAxis(uint axis);
@@ -27,7 +27,7 @@ class Gamepad : public Object
         bool IsGamepadDown(const std::string & button);
         bool IsDown(uint button);
         
-        int GetID();
+        uint GetID();
 
         void ClampAxis(float & x); 
 
@@ -38,7 +38,7 @@ class Gamepad : public Object
         void InitializeSixAxis();
         void InitializeVibration();
 
-        int id = 0;
+        uint id = 0;
         bool split = false;
 
         std::array<HidControllerID, 2> joycon;

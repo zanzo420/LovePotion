@@ -6,21 +6,17 @@
 #define CLASS_NAME "Gamepad"
 #define CLASS_TYPE LUAOBJ_TYPE_GAMEPAD
 
-vector<Gamepad *> controllers;
-
-int gamepadNew(lua_State * L)
+Gamepad * gamepadNew(lua_State * L, uint idx)
 {
     void * raw_self = luaobj_newudata(L, sizeof(Gamepad));
 
     luaobj_setclass(L, CLASS_TYPE, CLASS_NAME);
 
-    Gamepad * self = new (raw_self) Gamepad();
+    Gamepad * self = new (raw_self) Gamepad(idx);
 
     love_register(L, 2, self);
 
-    controllers.push_back(self);
-
-    return 1;
+    return self;
 }
 
 //Gamepad:getID
@@ -119,28 +115,28 @@ int gamepadIsGamepadDown(lua_State * L)
 }
 
 //Gamepad:split
-int gamepadSplit(lua_State * L)
-{
-    Gamepad * self =  (Gamepad *)luaobj_checkudata(L, 1, CLASS_TYPE);
+// int gamepadSplit(lua_State * L)
+// {
+//     Gamepad * self =  (Gamepad *)luaobj_checkudata(L, 1, CLASS_TYPE);
 
-    string layout = luaL_optstring(L, 2, "horizontal");
+//     string layout = luaL_optstring(L, 2, "horizontal");
 
-    bool canSplit = self->Split(layout);
-    int ret = 0;
+//     bool canSplit = self->Split(layout);
+//     int ret = 0;
 
-    if (canSplit)
-    {
-        gamepadNew(L);
-        Gamepad * split = (Gamepad *)luaobj_checkudata(L, -1, CLASS_TYPE);
-        split->SetSplit(true);
+//     if (canSplit)
+//     {
+//         gamepadNew(L);
+//         Gamepad * split = (Gamepad *)luaobj_checkudata(L, -1, CLASS_TYPE);
+//         split->SetSplit(true);
 
-        lua_pushinteger(L, split->GetID() + 1);
+//         lua_pushinteger(L, split->GetID() + 1);
 
-        ret++;
-    }
+//         ret++;
+//     }
 
-    return ret;
-}
+//     return ret;
+// }
 
 //Gamepad:merge
 int gamepadMerge(lua_State * L)
@@ -218,12 +214,11 @@ int initGamepadClass(lua_State * L)
         { "isVibrationSupported", gamepadIsVibrationSupported },
         { "merge",                gamepadMerge                },
         { "setVibration",         gamepadSetVibration         },
-        { "split",                gamepadSplit                },
-        { "new",                  gamepadNew                  },
+        // { "split",                gamepadSplit                },
         { 0, 0 }
     };
 
-    luaobj_newclass(L, CLASS_NAME, NULL, gamepadNew, reg);
+    luaobj_newclass(L, CLASS_NAME, NULL, NULL, reg);
 
     return 1;
 }

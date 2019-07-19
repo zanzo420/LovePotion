@@ -5,7 +5,7 @@
 #define CLASS_NAME "Gamepad"
 #define CLASS_TYPE LUAOBJ_TYPE_GAMEPAD
 
-vector<Gamepad *> controllers;
+extern Gamepad * controller3DS;
 
 int gamepadNew(lua_State * L)
 {
@@ -17,7 +17,7 @@ int gamepadNew(lua_State * L)
 
     love_register(L, 2, self);
 
-    controllers.push_back(self);
+    controller3DS = self;
 
     return 0;
 }

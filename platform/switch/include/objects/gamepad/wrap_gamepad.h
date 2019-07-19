@@ -1,6 +1,8 @@
 #pragma once
 
-int gamepadNew(lua_State * L);
+#include "objects/gamepad/gamepad.h"
+
+Gamepad * gamepadNew(lua_State * L, uint idx);
 
 int gamepadGetID(lua_State * L);
 
@@ -20,7 +22,7 @@ int gamepadIsDown(lua_State * L);
 
 int gamepadIsGamepadDown(lua_State * L);
 
-int gamepadSplit(lua_State * L);
+// int gamepadSplit(lua_State * L);
 
 int gamepadMerge(lua_State * L);
 

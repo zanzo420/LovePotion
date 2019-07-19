@@ -29,9 +29,9 @@ map<string, map<string, int>> HANDLE_COUNT =
     }}
 };
 
-Gamepad::Gamepad() : Object("Joystick")
+Gamepad::Gamepad(uint idx) : Object("Joystick")
 {
-    this->id = controllers.size();
+    this->id = idx;
 
     this->vibrationDuration = -1;
 
@@ -102,7 +102,7 @@ void Gamepad::InitializeSixAxis()
         hidStartSixAxisSensor(this->sixAxisHandles[1]);
 }
 
-int Gamepad::GetID()
+uint Gamepad::GetID()
 {
     return this->id;
 }

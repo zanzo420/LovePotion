@@ -65,7 +65,10 @@ void love_unregister(lua_State * L, void * object)
 void love_push_userdata(lua_State * L, void * object)
 {
     if (!object)
+    {
+        lua_pushnil(L);
         return;
+    }
 
     love_get_registry(L, OBJECTS);
     lua_pushlightuserdata(L, object);
