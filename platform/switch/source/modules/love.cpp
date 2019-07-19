@@ -13,7 +13,7 @@
 #include "modules/event.h"
 #include "modules/filesystem.h"
 #include "modules/graphics.h"
-#include "modules/joystick.h"
+#include "modules/mod_joystick.h"
 #include "modules/keyboard.h"
 #include "modules/mod_image.h"
 #include "modules/mod_math.h"

@@ -1,7 +1,7 @@
 #include "common/runtime.h"
 
 #include "objects/gamepad/gamepad.h"
-#include "modules/joystick.h"
+#include "modules/mod_joystick.h"
 #include "modules/event.h"
 
 int lastTouch[2];

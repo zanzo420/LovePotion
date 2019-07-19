@@ -8,9 +8,13 @@
 
 namespace Joystick
 {
+    // std::array<Gamepad *, 8> controllers;
+
     void Initialize(lua_State * L); //should set up joysticks
 
     Gamepad * GetJoystickFromID(uint id);
+    
+    void RemoveJoystick(uint id);
 
     //Löve2D Functions
 

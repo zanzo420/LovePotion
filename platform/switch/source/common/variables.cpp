@@ -27,7 +27,8 @@ std::vector<HidControllerID> CONTROLLER_IDS =
 std::vector<std::string> GAMEPAD_AXES =
 {
     "leftx", "lefty",
-    "rightx", "righty"
+    "rightx", "righty",
+    "triggerleft", "triggerright"
 };
 
 std::map<int, std::string> REGIONS =

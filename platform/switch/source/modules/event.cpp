@@ -2,7 +2,7 @@
 #include "modules/event.h"
 
 #include "objects/gamepad/gamepad.h"
-#include "modules/joystick.h"
+#include "modules/mod_joystick.h"
 #include "modules/timer.h"
 
 SDL_Event event;
@@ -20,41 +20,159 @@ int LoveEvent::Pump(lua_State * L)
         
         switch (event.type)
         {
-    
+            case SDL_JOYBUTTONDOWN:
+            case SDL_JOYBUTTONUP:
+            {
+                Gamepad * controller = Joystick::GetJoystickFromID(event.jbutton.which);
+
+                love_getfield(L, (event.type == SDL_JOYBUTTONDOWN) ? "joystickpressed" : "joystickreleased");
+
+                if (!lua_isnil(L, -1))
+                {
+                    love_push_userdata(L, controller);
+                    lua_pushnumber(L, event.jbutton.button + 1); // buttons are 1 indexed in LOVE
+
+                    lua_call(L, 2, 0);
+                }
+                break;
+            }
             case SDL_JOYAXISMOTION:
             {
                 Gamepad * controller = Joystick::GetJoystickFromID(event.jaxis.which);
 
-                love_getfield(L, "gamepadaxis");
+                love_getfield(L, "joystickaxis");
+
                 if (!lua_isnil(L, -1))
                 {
                     love_push_userdata(L, controller);
-                    lua_pushstring(L, GAMEPAD_AXES[event.jaxis.axis].c_str());
+
+                    lua_pushnumber(L, event.jaxis.axis);
 
                     float value = (float)event.jaxis.value / JOYSTICK_MAX;
                     controller->ClampAxis(value);
 
                     lua_pushnumber(L, value);
                     lua_call(L, 3, 0);
-
-                    args["gamepadaxis"] = {Variant(GAMEPAD_AXES[event.jaxis.axis]), Variant(value)};
-                    poll_queue.push(args);
                 }
                 break;
-            }    
-            case SDL_JOYBUTTONDOWN:
-            case SDL_JOYBUTTONUP:
+            }
+            case SDL_JOYHATMOTION:
             {
-                Gamepad * controller = Joystick::GetJoystickFromID(event.jbutton.which);
+                Gamepad * controller = Joystick::GetJoystickFromID(event.jaxis.which);
 
-                love_getfield(L, (event.type == SDL_JOYBUTTONDOWN) ? "gamepadpressed" : "gamepadreleased");
+                love_getfield(L, "joystickhat");
 
                 if (!lua_isnil(L, -1))
                 {
                     love_push_userdata(L, controller);
-                    lua_pushstring(L, KEYS[event.jbutton.button].c_str());
+                    lua_pushnumber(L, event.jhat.hat)
+                    
+                    string val;
+
+                    switch (event.jhat.value)
+                    {
+                        case SDL_HAT_CENTERED:
+                            val = "c";
+                            break;
+                        case SDL_HAT_DOWN:
+                            val = "d";
+                            break;
+                        case SDL_HAT_LEFT:
+                            val = "l";
+                            break;
+                        case SDL_HAT_LEFTDOWN:
+                            val = "ld";
+                            break;
+                        case SDL_HAT_LEFTUP:
+                            val = "lu";
+                            break;
+                        case SDL_HAT_RIGHT:
+                            val = "r";
+                            break;
+                        case SDL_HAT_RIGHTDOWN:
+                            val = "rd";
+                            break;
+                        case SDL_HAT_RIGHTUP:
+                            val = "ru";
+                            break;
+                        case SDL_HAT_UP:
+                            val = "u";
+                            break;
+                    }
+
+                    lua_pushstring(L, val.c_str());
+
+                    lua_call(L, 3, 0);
+                }
+
+                break;
+            }
+            case SDL_JOYDEVICEADDED:
+            {
+                // add joystick to list with jdevice.which
+                //Joystick::Add(event.jdevice.which);
+                // then grab that joystick out of the list and push it
+                Gamepad * controller = Joystick::GetJoystickFromID(event.jdevice.which);
+
+                love_getfield(L, "joystickadded");
+
+                if (!lua_isnil(L, -1))
+                {
+                    love_push_userdata(L, controller);
+
+                    lua_call(L, 1, 0);
+                }
+                break;
+            }
+            case SDL_JOYDEVICEREMOVED:
+            {
+                Gamepad * controller = Joystick::GetJoystickFromID(event.jdevice.which);
+
+                love_getfield(L, "joystickremoved");
+
+                if (!lua_isnil(L, -1))
+                {
+                    love_push_userdata(L, controller);
+
+                    lua_call(L, 1, 0);
+                }
+
+                Joystick::RemoveJoystick(event.jdevice.which);
+
+                break;
+            }
+            case SDL_CONTROLLERBUTTONDOWN:
+            case SDL_CONTROLLERBUTTONUP:
+            {
+                Gamepad * controller = Joystick::GetJoystickFromID(event.jbutton.which);
+
+                love_getfield(L, (event.type == SDL_CONTROLLERBUTTONDOWN) ? "gamepadpressed" : "gamepadreleased");
+
+                if (!lua_isnil(L, -1))
+                {
+                    love_push_userdata(L, controller);
+                    lua_pushstring(L, KEYS[event.cbutton.button].c_str());
 
                     lua_call(L, 2, 0);
+                }
+                break;
+            }
+            case SDL_CONTROLLERAXISMOTION:
+            {
+                Gamepad * controller = Joystick::GetJoystickFromID(event.jbutton.which);
+
+                love_getfield(L, "gamepadaxis");
+
+                if (!lua_isnil(L, -1))
+                {
+                    love_push_userdata(L, controller);
+                    lua_pushstring(L, GAMEPAD_AXES[event.caxis.axis].c_str());
+                    
+                    float value = (float)event.caxis.value / JOYSTICK_MAX;
+                    controller->ClampAxis(value);
+
+                    lua_pushnumber(L, value);
+                    lua_call(L, 3, 0);
                 }
                 break;
             }
@@ -93,12 +211,6 @@ int LoveEvent::Pump(lua_State * L)
                 }
                 break;
             }
-            case SDL_JOYDEVICEADDED:
-            case SDL_CONTROLLERDEVICEADDED:
-                break;
-            case SDL_JOYDEVICEREMOVED:
-            case SDL_CONTROLLERDEVICEREMOVED:
-                break;
             default:
                 break;
         }

@@ -2,7 +2,7 @@
 
 #include "objects/gamepad/gamepad.h"
 #include "objects/gamepad/wrap_gamepad.h"
-#include "modules/joystick.h"
+#include "modules/mod_joystick.h"
 
 void Joystick::Initialize(lua_State * L)
 {
@@ -16,6 +16,11 @@ void Joystick::Initialize(lua_State * L)
 Gamepad * Joystick::GetJoystickFromID(uint id)
 {
     return controllers[id];
+}
+
+void Joystick::RemoveJoystick(uint id)
+{
+    controllers.erase(controllers.begin() + id);
 }
 
 //Löve2D Functions
