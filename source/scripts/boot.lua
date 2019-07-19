@@ -108,23 +108,8 @@ local __defaultFont = love.graphics.newFont()
 love.graphics.setFont(__defaultFont)
 
 function love.createhandlers()
-    -- Standard callback handlers.
+    -- Standard event callback handlers.
     love.handlers = setmetatable({
-        load = function()
-            if love.load then
-                return love.load()
-            end
-        end,
-        update = function(dt)
-            if love.update then
-                return love.update(dt)
-            end
-        end,
-        draw = function()
-            if love.draw then
-                return love.draw()
-            end
-        end,
         keypressed = function (key)
             if love.keypressed then
                 return love.keypressed(key)
@@ -227,7 +212,6 @@ function love.createhandlers()
             error('Unknown event: ' .. name)
         end,
     })
-
 end
 
 love.createhandlers()
@@ -321,8 +305,6 @@ function love.errhand(message)
             love.graphics.present()
         end
     end
-
-    local joystick = love.joystick.getJoysticks()[1]
 
     local quit_string = "start"
     if love._os[2] == "Switch" then

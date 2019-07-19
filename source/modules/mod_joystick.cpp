@@ -63,6 +63,7 @@ int Joystick::GetJoysticks(lua_State * L)
             lua_settable(L, -3);
         }
     #elif defined(_3DS)
+        lua_pushnumber(L, 1);
         love_push_userdata(L, controller3DS);
 
         lua_settable(L, -3);
