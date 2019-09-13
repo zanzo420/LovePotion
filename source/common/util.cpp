@@ -46,7 +46,7 @@ void love_register(lua_State * L, int index, void * object)
 
     lua_pushlightuserdata(L, object);    //light userdata key
     lua_pushvalue(L, index);             //push the userdata value to the key
-    lua_settable(L, -3);                //set the taaable (╯°□°）╯︵ ┻━┻
+    lua_settable(L, -3);                 //set the taaable (╯°□°）╯︵ ┻━┻
 
     lua_setfield(L, LUA_REGISTRYINDEX, "_loveobjects");
 }

@@ -69,13 +69,9 @@ int Love::Initialize(lua_State * L)
     luaL_newlib(L, reg);
 
     // preload all the modules
-    char modname[30];
     for (int i = 0; modules[i].name; i++)
-    {
-        strcpy(modname, "love.");
-        strcat(modname, modules[i].name);
-        love_preload(L, modules[i].reg, modname);
-    }
+        love_preload(L, modules[i].reg, modules[i].name);
+
 
     LuaSocket::Initialize();
 

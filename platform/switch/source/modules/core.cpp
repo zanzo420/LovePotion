@@ -41,19 +41,19 @@
 
 love_modules modules[14] =
 {
-    { "audio",      Audio::Register,       Audio::Exit      },
-    { "event",      LoveEvent::Register,   NULL             },
-    { "filesystem", Filesystem::Register,  Filesystem::Exit },
-    { "graphics",   Graphics::Register,    NULL             },
-    { "image",      ImageModule::Register, NULL             },
-    { "joystick",   Joystick::Register,    NULL             },
-    { "keyboard",   Keyboard::Register,    NULL             },
-    { "math",       Math::Register,        NULL             },
-    { "system",     System::Register,      System::Exit     },
-    { "thread",     LoveThread::Register,  LoveThread::Exit },
-    { "timer",      Timer::Register,       NULL             },
-    { "touch",      Touch::Register,       NULL             },
-    { "window",     Window::Register,      NULL             },
+    { "love.audio",      Audio::Register,       Audio::Exit      },
+    { "love.event",      LoveEvent::Register,   NULL             },
+    { "love.filesystem", Filesystem::Register,  Filesystem::Exit },
+    { "love.graphics",   Graphics::Register,    NULL             },
+    { "love.image",      ImageModule::Register, NULL             },
+    { "love.joystick",   Joystick::Register,    NULL             },
+    { "love.keyboard",   Keyboard::Register,    NULL             },
+    { "love.math",       Math::Register,        NULL             },
+    { "love.system",     System::Register,      System::Exit     },
+    { "love.thread",     LoveThread::Register,  LoveThread::Exit },
+    { "love.timer",      Timer::Register,       NULL             },
+    { "love.touch",      Touch::Register,       NULL             },
+    { "love.window",     Window::Register,      NULL             },
     { 0 }
 };
 
