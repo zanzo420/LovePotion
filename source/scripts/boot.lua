@@ -23,8 +23,10 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 
+require("love")
+
 -- Load the LOVE filesystem module, its absolutely needed
-love.filesystem = require("love.filesystem")
+require("love.filesystem")
 
 -- 3DS and Switch can't load external C libraries,
 -- so we need to prevent require from searching for them
@@ -401,7 +403,7 @@ function love.boot()
     -- Load them all!
     for i, v in ipairs(modules) do
         if config.modules[v] then
-            love[v] = require("love." .. v)
+            require("love." .. v)
         end
     end
 

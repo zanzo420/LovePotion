@@ -28,7 +28,7 @@ int LoveEvent::Register(lua_State * L)
         { 0, 0 }
     };
 
-    luaL_newlib(L, reg);
+    love_register_module(L, "love.event", reg);
 
     return 1;
 }

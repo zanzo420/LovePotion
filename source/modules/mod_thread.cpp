@@ -41,7 +41,7 @@ int LoveThread::Register(lua_State * L)
         { 0, 0 }
     };
 
-    luaL_newlib(L, reg);
+    love_register_module(L, "love.thread", reg);
 
     return 1;
 }

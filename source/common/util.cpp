@@ -40,6 +40,36 @@ int love_preload(lua_State * L, lua_CFunction function, const char * name)
     return 0;
 }
 
+void love_register_module(lua_State * L, const char * name, const luaL_reg * funcs)
+{
+    //make sure the love global is a table that we can use
+    lua_getglobal(L, "love");
+
+	if (!lua_istable(L, -1))
+	{
+		lua_pop(L, 1);
+		lua_newtable(L);
+		lua_pushvalue(L, -1);
+		lua_setglobal(L, "love");
+	}
+
+    //table for the module
+    lua_newtable(L);
+
+    //add all the functions to the module
+    for (; funcs->name != nullptr; funcs++)
+	{
+		lua_pushcfunction(L, funcs->func);
+		lua_setfield(L, -2, funcs->name);
+	}
+
+    //name the module and then take it off the stack
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -3, name);
+    lua_remove(L, -2);
+}
+
+//register userdata
 void love_register(lua_State * L, int index, void * object)
 {
     love_get_registry(L, OBJECTS);

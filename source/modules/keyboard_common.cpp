@@ -9,7 +9,7 @@ int Keyboard::Register(lua_State * L)
         { 0, 0 },
     };
 
-    luaL_newlib(L, reg);
+    love_register_module(L, "love.keyboard", reg);
     
     return 1;
 }

@@ -132,7 +132,7 @@ int Audio::Register(lua_State * L)
         { 0, 0 },
     };
 
-    luaL_newlib(L, reg);
+    love_register_module(L, "love.audio", reg);
 
     return 1;
 }
