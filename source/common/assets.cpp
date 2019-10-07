@@ -1,6 +1,8 @@
 #include "common/runtime.h"
 #include "common/assets.h"
 
+extern bool isRomfsInitialized;
+
 void Assets::Initialize(char * path)
 {
     uint gameAssets = Assets::GetLocation(path);

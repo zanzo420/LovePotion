@@ -36,8 +36,8 @@ int threadStart(lua_State * L)
         }
     }
 
-    if (!self->IsRunning())
-        self->Start(args);
+    // if (!self->IsRunning())
+    //     self->Start(args);
 
     return 0;
 }
@@ -46,8 +46,8 @@ int threadWait(lua_State * L)
 {
     LuaThread * self = (LuaThread *)luaobj_checkudata(L, 1, CLASS_TYPE);
 
-    if (self->IsRunning())
-        self->Wait();
+    // if (self->IsRunning())
+    //     self->Wait();
 
     return 0;
 }
